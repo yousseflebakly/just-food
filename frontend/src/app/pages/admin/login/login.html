@@ -1,0 +1,51 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <span class="brand-icon">🍔</span>
+      <h1>Just<span>Food</span></h1>
+    </div>
+
+    <p class="subtitle">Admin Control Panel</p>
+
+    <div class="welcome">
+      <h2>Welcome Back!</h2>    
+      <p>Sign in to manage your restaurant.</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label for="email">Email Address</label>
+    <input
+      id="email"
+      type="email"
+      formControlName="email"
+      placeholder="Enter your email"
+      autocomplete="username"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input
+      id="password"
+      type="password"
+      formControlName="password"
+      placeholder="Enter your password"
+      autocomplete="current-password"
+    />
+  </div>
+
+  @if (errorMessage) {
+    <p class="login-error" role="alert">{{ errorMessage }}</p>
+  }
+
+  <button type="submit" class="login-btn" [disabled]="isLoading">
+    {{ isLoading ? 'Signing In...' : 'Sign In' }}
+  </button>
+</form>
+
+    <p class="footer-text">
+      © 2026 Just Food. All rights reserved.
+    </p>
+  </div>
+</div>

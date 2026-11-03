@@ -1,0 +1,125 @@
+
+<section class="cart-page">
+  <h1>🛒 {{ languageService.translate('cart.title') }}</h1>
+  <p>{{ languageService.translate('cart.subtitle') }}</p>
+
+  @if (cartService.items().length === 0) {
+    <div class="empty-cart">
+      <h2>{{ languageService.translate('cart.emptyTitle') }}</h2>
+      <p>{{ languageService.translate('cart.emptyText') }}</p>
+
+      <a routerLink="/menu">
+        {{ languageService.translate('cart.browse') }}
+      </a>
+    </div>
+  } @else {
+
+    <!-- Cart Header Actions -->
+    <div class="cart-actions">
+      <button
+        type="button"
+        class="remove-all-btn"
+        (click)="removeAllItems()"
+      >
+        <span aria-hidden="true">🗑</span>
+        {{
+          languageService.currentLanguage() === 'ar'
+            ? 'مسح الكل'
+            : 'Remove All'
+        }}
+      </button>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="cart-items">
+      @for (item of cartService.items(); track item.product.id) {
+        <div class="cart-item">
+          <img
+            [src]="item.product.image"
+            [alt]="localizedProductName(item.product, languageService.currentLanguage())"
+          />
+
+          <div class="item-info">
+            <h3>
+              {{
+                localizedProductName(
+                  item.product,
+                  languageService.currentLanguage()
+                )
+              }}
+            </h3>
+
+            <p>
+              {{ languageService.translate('common.price') }}
+              {{ item.product.price }}
+              {{ languageService.translate('common.currency') }}
+            </p>
+
+            <div class="quantity-controls">
+              <button
+                type="button"
+                [attr.aria-label]="languageService.translate('common.decrease')"
+                (click)="cartService.decreaseQuantity(item.product.id)"
+              >
+                −
+              </button>
+
+              <span>{{ item.quantity }}</span>
+
+              <button
+                type="button"
+                [attr.aria-label]="languageService.translate('common.increase')"
+                (click)="cartService.increaseQuantity(item.product.id)"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="item-actions">
+            <strong>
+              {{ item.product.price * item.quantity }}
+              {{ languageService.translate('common.currency') }}
+            </strong>
+
+            <button
+              type="button"
+              class="remove-btn"
+              [attr.aria-label]="
+                languageService.translate('common.remove') +
+                ' ' +
+                localizedProductName(
+                  item.product,
+                  languageService.currentLanguage()
+                )
+              "
+              (click)="cartService.removeFromCart(item.product.id)"
+            >
+              🗑 {{ languageService.translate('common.remove') }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <h2>{{ languageService.translate('cart.summary') }}</h2>
+
+      <p>
+        {{ languageService.translate('cart.totalItems') }}
+        {{ cartService.totalItems() }}
+      </p>
+
+      <h3>
+        {{ languageService.translate('cart.total') }}
+        {{ cartService.totalPrice() }}
+        {{ languageService.translate('common.currency') }}
+      </h3>
+
+      <a routerLink="/checkout" class="checkout-btn">
+        {{ languageService.translate('cart.checkout') }}
+      </a>
+    </div>
+  }
+</section>

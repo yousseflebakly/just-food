@@ -1,0 +1,244 @@
+
+<section
+  class="profile-page"
+  [attr.dir]="languageService.currentLanguage() === 'ar' ? 'rtl' : 'ltr'"
+>
+  <div class="profile-container">
+
+    <!-- Page Header -->
+    <header class="page-header">
+      <h1>
+        {{ translate('My Profile', 'الملف الشخصي') }}
+      </h1>
+
+      <p>
+        {{
+          translate(
+            'Manage your account, orders, and preferences.',
+            'إدارة حسابك وطلباتك وتفضيلاتك.'
+          )
+        }}
+      </p>
+    </header>
+
+    <!-- Customer Header -->
+    <div class="profile-card">
+      <div class="profile-avatar" aria-hidden="true">
+        👤
+      </div>
+
+      @if (isLoggedIn && customer) {
+        <div class="profile-details">
+          <h2>{{ customerName }}</h2>
+
+          <span class="account-status">
+            {{ translate('Customer Account', 'حساب العميل') }}
+          </span>
+        </div>
+      } @else {
+        <div class="profile-details">
+          <h2>
+            {{ translate('Welcome!', 'أهلاً بيك!') }}
+          </h2>
+
+          <p>
+            {{
+              translate(
+                'Sign in or create an account to manage your information and orders.',
+                'سجّل دخولك أو أنشئ حساب لإدارة بياناتك وطلباتك.'
+              )
+            }}
+          </p>
+        </div>
+
+        <div class="profile-auth-actions">
+          <a routerLink="/login" class="login-button">
+            {{ translate('Login', 'تسجيل الدخول') }}
+          </a>
+
+          <a routerLink="/register" class="register-button">
+            {{ translate('Create Account', 'إنشاء حساب') }}
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Personal Information -->
+    @if (isLoggedIn && customer) {
+      <section class="profile-section">
+        <div class="section-heading">
+          <h2>
+            {{ translate('Personal Information', 'المعلومات الشخصية') }}
+          </h2>
+        </div>
+
+        <div class="menu-card personal-info-card">
+
+          <!-- Full Name -->
+          <div class="personal-info-field">
+            <div class="personal-info-heading">
+              <span class="menu-icon" aria-hidden="true">👤</span>
+              <span class="menu-label">
+                {{ translate('Full Name', 'الاسم بالكامل') }}
+              </span>
+            </div>
+
+            <div class="personal-info-value">
+              {{ customerName }}
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="personal-info-field">
+            <div class="personal-info-heading">
+              <span class="menu-icon" aria-hidden="true">📧</span>
+              <span class="menu-label">
+                {{ translate('Email Address', 'البريد الإلكتروني') }}
+              </span>
+            </div>
+
+            <div class="personal-info-value">
+              {{ customerEmail }}
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="personal-info-field">
+            <div class="personal-info-heading">
+              <span class="menu-icon" aria-hidden="true">📱</span>
+              <span class="menu-label">
+                {{ translate('Phone Number', 'رقم الموبايل') }}
+              </span>
+            </div>
+
+            <div class="personal-info-value">
+              {{
+                customerPhone ||
+                translate('Not provided', 'غير مضاف')
+              }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+    }
+
+    <!-- Account Management -->
+    <section class="profile-section">
+      <div class="section-heading">
+        <h2>
+          {{ translate('Account Management', 'إدارة الحساب') }}
+        </h2>
+      </div>
+
+      <div class="menu-card">
+        @for (item of accountItems; track item.id) {
+          @if (item.id === 'orders') {
+            <button
+              type="button"
+              class="menu-item"
+              style="width: 100%; border: 0; background: transparent; font: inherit; color: inherit; text-align: start; cursor: pointer;"
+              (click)="onMenuItemClick(item)"
+            >
+              <span class="menu-item-content">
+                <span class="menu-icon" aria-hidden="true">
+                  {{ item.icon }}
+                </span>
+
+                <span class="menu-label">
+                  {{ itemLabel(item) }}
+                </span>
+              </span>
+
+              <span class="menu-arrow" aria-hidden="true">
+                {{ languageService.currentLanguage() === 'ar' ? '‹' : '›' }}
+              </span>
+            </button>
+          } @else {
+            <div class="menu-item">
+              <div class="menu-item-content">
+                <span class="menu-icon" aria-hidden="true">
+                  {{ item.icon }}
+                </span>
+
+                <span class="menu-label">
+                  {{ itemLabel(item) }}
+                </span>
+              </div>
+
+              <span class="menu-arrow" aria-hidden="true">
+                {{ languageService.currentLanguage() === 'ar' ? '‹' : '›' }}
+              </span>
+            </div>
+          }
+        }
+      </div>
+    </section>
+
+    <!-- Support & Information -->
+    <section class="profile-section">
+      <div class="section-heading">
+        <h2>
+          {{ translate('Support & Information', 'الدعم والمعلومات') }}
+        </h2>
+      </div>
+
+      <div class="menu-card">
+        @for (item of supportItems; track item.id) {
+          <div class="menu-item">
+            <div class="menu-item-content">
+              <span class="menu-icon" aria-hidden="true">
+                {{ item.icon }}
+              </span>
+
+              <span class="menu-label">
+                {{ itemLabel(item) }}
+              </span>
+            </div>
+
+            <span class="menu-arrow" aria-hidden="true">
+              {{ languageService.currentLanguage() === 'ar' ? '‹' : '›' }}
+            </span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Logout: Separate Section at Bottom -->
+    @if (isLoggedIn && customer) {
+      <section class="profile-section logout-section">
+        <div class="section-heading">
+          <h2>
+            {{ translate('Account Actions', 'إعدادات الحساب') }}
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="logout-button logout-full-width"
+          (click)="logout()"
+        >
+          <span aria-hidden="true">🚪</span>
+          <span>
+            {{ translate('Logout', 'تسجيل الخروج') }}
+          </span>
+        </button>
+      </section>
+    } @else {
+      <!-- Guest Footer -->
+      <div class="profile-footer-note">
+        <span aria-hidden="true">🔐</span>
+
+        <p>
+          {{
+            translate(
+              'Create an account to enjoy a personalized ordering experience.',
+              'أنشئ حساب واستمتع بتجربة طلبات مخصصة ليك.'
+            )
+          }}
+        </p>
+      </div>
+    }
+
+  </div>
+</section>

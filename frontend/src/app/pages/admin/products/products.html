@@ -1,0 +1,443 @@
+
+<div class="products-page">
+  <div class="page-header">
+    <div>
+      <h1>Products Management</h1>
+      <p>Manage your restaurant menu and products.</p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="add-product-btn"
+        [disabled]="isSavingProduct || isUploadingImage"
+        (click)="openAddProductForm()"
+      >
+        + Add New Product
+      </button>
+
+      <button
+        type="button"
+        class="refresh-btn"
+        [disabled]="isLoading || isUpdatingProduct"
+        (click)="loadProducts()"
+      >
+        {{ isLoading ? 'Refreshing...' : '↻ Refresh Products' }}
+      </button>
+    </div>
+  </div>
+
+  @if (successMessage) {
+    <div class="state-message success" role="status">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="state-message error" role="alert">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="state-message">Loading products...</div>
+  } @else {
+    <!-- Active Products -->
+    <section class="products-section">
+      <div class="section-header">
+        <div>
+          <h2>Active Products</h2>
+          <p>Manage products currently in your restaurant catalog.</p>
+        </div>
+
+        <span class="count-badge">
+          {{ activeProducts.length }} Products
+        </span>
+      </div>
+
+      @if (activeProducts.length === 0) {
+        <div class="state-message">
+          No active products found.
+        </div>
+      } @else {
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Availability</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (product of activeProducts; track product.id) {
+                <tr>
+                  <td>
+                    <div class="product-info">
+                      <img
+                        [src]="getImageUrl(product.image)"
+                        [alt]="product.name"
+                      />
+
+                      <div>
+                        <strong>{{ product.name }}</strong>
+                        <p>{{ product.description }}</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>{{ product.category }}</td>
+                  <td>{{ product.price }} EGP</td>
+
+                  <td>
+                    <span
+                      class="availability-badge"
+                      [class.available]="product.isAvailable"
+                      [class.unavailable]="!product.isAvailable"
+                    >
+                      {{ product.isAvailable ? 'Available' : 'Unavailable' }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="product-actions">
+                      <button
+                        type="button"
+                        class="edit-btn"
+                        [disabled]="isUpdatingProduct || isUploadingImage"
+                        (click)="openEditProductForm(product)"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        class="delete-btn"
+                        [disabled]="isUpdatingProduct"
+                        (click)="softDeleteProduct(product)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <!-- Deleted Products -->
+    <section class="products-section deleted-section">
+      <div class="section-header">
+        <div>
+          <h2>Deleted Products</h2>
+          <p>Restore previously deleted products whenever you need.</p>
+        </div>
+
+        <span class="count-badge deleted-count">
+          {{ deletedProducts.length }} Products
+        </span>
+      </div>
+
+      @if (deletedProducts.length === 0) {
+        <div class="state-message">
+          No deleted products.
+        </div>
+      } @else {
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (product of deletedProducts; track product.id) {
+                <tr>
+                  <td>
+                    <div class="product-info">
+                      <img
+                        [src]="getImageUrl(product.image)"
+                        [alt]="product.name"
+                      />
+
+                      <div>
+                        <strong>{{ product.name }}</strong>
+                        <p>{{ product.description }}</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>{{ product.category }}</td>
+                  <td>{{ product.price }} EGP</td>
+
+                  <td>
+                    <span class="availability-badge deleted">
+                      Deleted
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="product-actions">
+                      <button
+                        type="button"
+                        class="restore-btn"
+                        [disabled]="isUpdatingProduct"
+                        (click)="restoreProduct(product)"
+                      >
+                        Restore
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Add / Edit Product Modal -->
+  @if (isAddProductFormOpen) {
+    <div class="modal-overlay">
+      <div class="product-modal">
+        <div class="modal-header">
+          <h2>
+            {{
+              editingProductId !== null
+                ? 'Edit Product'
+                : 'Add New Product'
+            }}
+          </h2>
+
+          <button
+            type="button"
+            class="close-btn"
+            [disabled]="isSavingProduct || isUploadingImage"
+            (click)="closeAddProductForm()"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form
+          class="product-form"
+          #productForm="ngForm"
+          (ngSubmit)="saveProduct()"
+        >
+          <!-- Product Name -->
+          <div class="form-group">
+            <label for="productName">Product Name</label>
+
+            <input
+              id="productName"
+              type="text"
+              name="name"
+              [(ngModel)]="newProduct.name"
+              placeholder="e.g. Spicy Chicken Burger"
+              required
+            />
+          </div>
+
+          <!-- Arabic product name (Admin interface stays English) -->
+          <div class="form-group" dir="ltr">
+            <label for="productNameAr">Arabic Name</label>
+            <input
+              id="productNameAr"
+              type="text"
+              name="nameAr"
+              dir="rtl"
+              [(ngModel)]="newProduct.nameAr"
+              placeholder="Enter product name in Arabic"
+            />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="productDescription">Description</label>
+
+            <textarea
+              id="productDescription"
+              name="description"
+              [(ngModel)]="newProduct.description"
+              rows="3"
+              placeholder="Describe your product"
+              required
+            ></textarea>
+          </div>
+
+          <!-- Arabic description -->
+          <div class="form-group" dir="ltr">
+            <label for="productDescriptionAr">Arabic Description</label>
+            <textarea
+              id="productDescriptionAr"
+              name="descriptionAr"
+              dir="rtl"
+              [(ngModel)]="newProduct.descriptionAr"
+              rows="3"
+              placeholder="Enter product description in Arabic"
+            ></textarea>
+          </div>
+
+          <!-- Price and Category -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productPrice">Price (EGP)</label>
+
+              <select
+                id="productPrice"
+                name="price"
+                [(ngModel)]="newProduct.price"
+                required
+              >
+                @for (price of priceOptions; track price) {
+                  <option [ngValue]="price">
+                    {{ price }} EGP
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="productCategory">Category</label>
+
+              <select
+                id="productCategory"
+                name="categoryId"
+                [(ngModel)]="selectedCategoryId"
+                required
+              >
+                <option [ngValue]="null" disabled>
+                  Select a category
+                </option>
+
+                @for (category of categories; track category.id) {
+                  <option [ngValue]="category.id">
+                    {{ category.name }}
+                  </option>
+                }
+              </select>
+
+              @if (categories.length === 0) {
+                <small>
+                  No categories available. Add categories from
+                  Categories Management first.
+                </small>
+              }
+            </div>
+          </div>
+
+          <!-- Product Image Upload -->
+          <div class="form-group">
+            <label for="productImageUpload">Product Image</label>
+
+            <input
+              id="productImageUpload"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              [disabled]="isUploadingImage || isSavingProduct"
+              (change)="onImageSelected($event)"
+            />
+
+            <small>
+              Choose a JPG, PNG or WebP image (maximum 5MB).
+            </small>
+
+            @if (isUploadingImage) {
+              <p class="upload-status" role="status">
+                Uploading image, please wait...
+              </p>
+            }
+
+            @if (newProduct.image && !isUploadingImage) {
+              <div class="image-preview">
+                <img
+                  [src]="getImageUrl(newProduct.image)"
+                  alt="Product image preview"
+                />
+              </div>
+            }
+          </div>
+
+          <!-- Image URL fallback -->
+          <div class="form-group">
+            <label for="productImage">
+              Image URL / Path (Optional alternative)
+            </label>
+
+            <input
+              id="productImage"
+              type="text"
+              name="image"
+              [(ngModel)]="newProduct.image"
+              placeholder="Upload an image above or enter an image URL"
+              required
+              [disabled]="isUploadingImage || isSavingProduct"
+            />
+          </div>
+
+          <!-- Availability -->
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                name="isAvailable"
+                [(ngModel)]="newProduct.isAvailable"
+              />
+              Available for customers
+            </label>
+          </div>
+
+          @if (formErrorMessage) {
+            <div class="state-message error" role="alert">
+              {{ formErrorMessage }}
+            </div>
+          }
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="cancel-btn"
+              [disabled]="isSavingProduct || isUploadingImage"
+              (click)="closeAddProductForm()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="
+                isSavingProduct ||
+                isUploadingImage ||
+                productForm.invalid ||
+                !newProduct.image
+              "
+            >
+              {{
+                isUploadingImage
+                  ? 'Uploading Image...'
+                  : isSavingProduct
+                    ? 'Saving...'
+                    : editingProductId !== null
+                      ? 'Save Changes'
+                      : 'Save Product'
+              }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

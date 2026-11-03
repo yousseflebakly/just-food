@@ -1,0 +1,63 @@
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span>🍔</span>
+      <h2>Just<span>Food</span></h2>
+    </div>
+
+    <p class="sidebar-label">MANAGEMENT</p>
+
+    <nav class="sidebar-nav">
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <span>📊</span> Dashboard
+      </a>
+
+      <a
+        routerLink="/admin/orders"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <span>🧾</span> Orders
+      </a>
+
+      <a
+        routerLink="/admin/products"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <span>🍔</span> Products
+      </a>
+
+      <a
+        routerLink="/admin/categories"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <span>📂</span> Categories
+      </a>
+
+      <a
+  routerLink="/admin/settings"
+  routerLinkActive="active"
+  class="nav-link"
+>
+  <span>⚙️</span> Settings
+</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <span>Just Food Admin Panel</span>
+    </div>
+  </aside>
+
+  <!-- Page Content -->
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

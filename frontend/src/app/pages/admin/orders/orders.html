@@ -1,0 +1,258 @@
+
+<div class="orders-page">
+ 
+<a routerLink="/admin/dashboard" class="back-dashboard-btn">
+  ← Back to Dashboard
+</a>
+
+    <div class="page-header">
+    <div>
+      <h1>Orders Management</h1>
+      <p>View and manage all restaurant orders.</p>
+    </div>
+    
+@if (statusMessage) {
+  <div class="status-message success" role="status">
+    ✅ {{ statusMessage }}
+  </div>
+}
+
+@if (statusErrorMessage) {
+  <div class="status-message error" role="alert">
+    ⚠️ {{ statusErrorMessage }}
+  </div>
+}   
+
+<div class="orders-filters">
+  <input
+    type="text"
+    class="search-input"
+    placeholder="Search by order ID, customer name or phone..."
+    [(ngModel)]="searchTerm"
+ (ngModelChange)="resetPagination()"
+  />
+  
+<select
+  class="status-filter"
+  [(ngModel)]="selectedStatus"
+   (ngModelChange)="resetPagination()"
+>
+  <option value="ALL">All Statuses</option>
+  <option value="PENDING">Pending</option>
+  <option value="ACCEPTED">Accepted</option>
+  <option value="PREPARING">Preparing</option>
+  <option value="READY">Ready</option>
+  <option value="DELIVERED">Delivered</option>
+  <option value="CANCELLED">Cancelled</option>
+</select>
+
+</div>
+
+@if (!isLoading && !errorMessage) {
+  <div class="orders-count">
+    Showing {{ filteredOrders.length }} of {{ orders.length }} orders
+  </div>
+}
+
+
+    <button
+      type="button"
+      class="refresh-btn"
+      [disabled]="isLoading"
+      (click)="loadOrders()"
+    >
+      {{ isLoading ? 'Refreshing...' : '↻ Refresh Orders' }}
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="state-message">Loading orders...</div>
+  } @else if (errorMessage) {
+    <div class="state-message error" role="alert">
+      {{ errorMessage }}
+    </div>
+  } @else if (orders.length === 0) {
+    <div class="state-message">No orders found.</div>
+  } @else {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+         @for (order of paginatedOrders; track order.id) {
+            <tr>
+              <td>#{{ order.id }}</td>
+              <td>{{ order.fullName }}</td>
+              <td>{{ order.phoneNumber }}</td>
+              <td>{{ order.createdAt | date:'medium' }}</td>
+              <td>{{ order.totalPrice }} EGP</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [ngClass]="order.status.toLowerCase()"
+                >
+                  {{ order.status }}
+                </span>
+              </td>
+              
+
+<td>
+  <div class="order-actions">
+    <button
+      type="button"
+      class="view-details-btn"
+      (click)="openOrderDetails(order)"
+    >
+      View Details
+    </button>
+
+    @if (getNextStatus(order.status)) {
+      <button
+        type="button"
+        class="update-status-btn"
+        [disabled]="updatingOrderId !== null"
+        (click)="updateStatus(order)"
+      >
+        @if (updatingOrderId === order.id) {
+          Updating...
+        } @else {
+          {{ getStatusButtonLabel(order.status) }}
+        }
+      </button>
+    }
+    
+@if (
+  order.status === 'PENDING' ||
+  order.status === 'ACCEPTED' ||
+  order.status === 'PREPARING'
+) {
+  <button
+    type="button"
+    class="cancel-order-btn"
+    [disabled]="updatingOrderId !== null"
+    (click)="cancelOrder(order)"
+  >
+    Cancel Order
+  </button>
+}
+
+  </div>
+</td>
+
+
+            </tr>
+          } @empty {
+    <tr>
+      <td colspan="7" class="no-results">
+        No matching orders found. Try another search or status.
+      </td>
+    </tr>
+  }
+        </tbody>
+      </table>
+    </div>
+    
+<div class="pagination">
+  <button
+    type="button"
+    [disabled]="currentPage <= 1"
+    (click)="changePage(currentPage - 1)"
+  >
+    ← Previous
+  </button>
+
+  <span>
+    Page {{ currentPage > totalPages ? totalPages : currentPage }}
+    of {{ totalPages }}
+  </span>
+
+  <button
+    type="button"
+    [disabled]="currentPage >= totalPages"
+    (click)="changePage(currentPage + 1)"
+  >
+    Next →
+  </button>
+</div>
+
+  }
+</div>
+
+@if (selectedOrder; as order) {
+  <div class="modal-overlay" (click)="closeOrderDetails()">
+    <div
+      class="order-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="order-details-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div>
+          <h2 id="order-details-title">Order #{{ order.id }}</h2>
+          <p>{{ order.createdAt | date:'medium' }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-modal-btn"
+          aria-label="Close order details"
+          (click)="closeOrderDetails()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <h3>Customer Information</h3>
+
+        <p><strong>Name:</strong> {{ order.fullName }}</p>
+        <p><strong>Phone:</strong> {{ order.phoneNumber }}</p>
+        <p><strong>Address:</strong> {{ order.address }}</p>
+        <p><strong>Notes:</strong> {{ order.notes || 'No notes' }}</p>
+
+        <h3>Ordered Products</h3>
+
+        <div class="order-items">
+          @for (item of order.items; track item.id) {
+            <div class="order-item">
+              <div>
+                <strong>{{ item.product.name }}</strong>
+                <p>Quantity: {{ item.quantity }}</p>
+              </div>
+
+              <span>
+                {{ +item.unitPrice * item.quantity }} EGP
+              </span>
+            </div>
+          }
+        </div>
+
+        <div class="order-total">
+          <strong>Total</strong>
+          <strong>{{ order.totalPrice }} EGP</strong>
+        </div>
+
+        <p>
+          <strong>Status:</strong>
+          <span
+            class="status-badge"
+            [ngClass]="order.status.toLowerCase()"
+          >
+            {{ order.status }}
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+}

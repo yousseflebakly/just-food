@@ -1,0 +1,31 @@
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-badge">{{ languageService.translate('home.badge') }}</span>
+
+    <h1>
+      {{ languageService.translate('home.title') }}
+      <span>{{ languageService.translate('home.subtitle') }}</span>
+    </h1>
+
+    <p>
+      {{ languageService.translate('home.description') }}
+    </p>
+
+    <div class="hero-actions">
+      <a routerLink="/menu" class="primary-btn">
+        {{ languageService.translate('home.order') }}
+      </a>
+
+      <a href="#about" class="secondary-btn">
+        {{ languageService.translate('home.explore') }}
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-image">
+    <img
+      src="/assets/images/hero-burger.png"
+      alt="Delicious Burger"
+    />
+  </div>
+</section>

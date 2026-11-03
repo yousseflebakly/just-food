@@ -1,0 +1,66 @@
+<section class="menu-page">
+  <div class="menu-header">
+    <span class="menu-badge">{{ languageService.translate('menu.badge') }}</span>
+
+    <h1>{{ languageService.translate('menu.title') }}</h1>
+
+    <p>
+      {{ languageService.translate('menu.description') }}
+    </p>
+  </div>
+<div class="menu-search">
+  <span class="search-icon">⌕</span>
+
+  <input
+    type="search"
+    [placeholder]="
+      languageService.currentLanguage() === 'ar'
+        ? 'ابحث عن وجبتك المفضلة...'
+        : 'Search for your favorite meal...'
+    "
+    [value]="searchTerm"
+    (input)="onSearchInput($event)"
+    aria-label="Search menu products"
+  />
+</div>
+  @if (isLoading) {
+  <p>{{ languageService.translate('menu.loading') }}</p>
+} @else if (errorMessage) {
+  <p role="alert">{{ languageService.translate(errorMessage) }}</p>
+} @else {
+  <div class="products-grid">
+   @for (product of filteredProducts; track product.id) {
+      <div class="product-card">
+        <div class="product-image">
+          <img
+            [src]="product.image"
+            [alt]="localizedProductName(product, languageService.currentLanguage())"
+          />
+        </div>
+
+        <div class="product-info">
+          <span class="category">
+            {{ localizedCategory(product.category, languageService.currentLanguage()) }}
+          </span>
+
+          <h3>{{ localizedProductName(product, languageService.currentLanguage()) }}</h3>
+
+          <p>{{ localizedProductDescription(product, languageService.currentLanguage()) }}</p>
+
+          <div class="product-footer">
+            <span class="price">
+              {{ product.price }} {{ languageService.translate('common.currency') }}
+            </span>
+
+            <button type="button" class="add-btn" (click)="addToCart(product)">
+              {{ languageService.translate('menu.add') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    } @empty {  
+      <p>{{ languageService.translate('menu.empty') }}</p>
+    }
+  </div>
+}
+</section>

@@ -1,0 +1,27 @@
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Build files
+dist/
+build/
+coverage/
+.angular/
+
+# Generated Prisma files
+backend/src/generated/prisma/
+
+# Uploaded images
+backend/uploads/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db

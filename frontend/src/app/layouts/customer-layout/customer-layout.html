@@ -1,0 +1,115 @@
+
+<header class="navbar">
+  <div class="restaurant-brand">
+    @if (restaurantLogo) {
+      <img
+        class="restaurant-logo"
+        [src]="restaurantLogo"
+        [alt]="restaurantName + ' logo'"
+      />
+    } @else {
+      <span class="restaurant-icon">🍔</span>
+    }
+
+    <h2>{{ restaurantName }}</h2>
+  </div>
+
+  <nav class="navbar-links">
+    <a routerLink="/">
+      {{ languageService.translate('nav.home') }}
+    </a>
+
+    <a routerLink="/menu">
+      {{ languageService.translate('nav.menu') }}
+    </a>
+
+    <a routerLink="/cart" class="cart-link">
+      🛒 {{ languageService.translate('nav.cart') }}
+
+      @if (cartService.totalItems() > 0) {
+        <span class="cart-count">
+          {{ cartService.totalItems() }}
+        </span>
+      }
+    </a>
+  </nav>
+
+  <div class="navbar-actions">
+
+    <!-- Customer Authentication -->
+    @if (customerAuthService.isLoggedIn()) {
+      <a
+        routerLink="/profile"
+        class="profile-link"
+        [attr.aria-label]="
+          customerAuthService.customer()?.fullName ||
+          (languageService.currentLanguage() === 'ar'
+            ? 'الملف الشخصي'
+            : 'My Profile')
+        "
+        [title]="
+          customerAuthService.customer()?.fullName ||
+          (languageService.currentLanguage() === 'ar'
+            ? 'الملف الشخصي'
+            : 'My Profile')
+        "
+      >
+        <span class="profile-icon" aria-hidden="true">👤</span>
+
+        <span class="profile-label">
+          {{
+            customerAuthService.customer()?.fullName ||
+            (languageService.currentLanguage() === 'ar'
+              ? 'حسابي'
+              : 'My Profile')
+          }}
+        </span>
+      </a>
+    } @else {
+      <div class="auth-actions">
+        <a routerLink="/login" class="login-link">
+          {{
+            languageService.currentLanguage() === 'ar'
+              ? 'تسجيل الدخول'
+              : 'Login'
+          }}
+        </a>
+
+        <a routerLink="/register" class="register-link">
+          {{
+            languageService.currentLanguage() === 'ar'
+              ? 'إنشاء حساب'
+              : 'Register'
+          }}
+        </a>
+      </div>
+    }
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+      <span class="language-icon">🌐</span>
+
+      <select
+        class="language-select"
+        aria-label="Choose website language"
+        [value]="languageService.currentLanguage()"
+        (change)="onLanguageChange($event)"
+      >
+        <option value="en">🇬🇧 English</option>
+        <option value="ar">🇪🇬 العربية</option>
+      </select>
+    </div>
+
+  </div>
+</header>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="footer">
+  <p>
+    © 2026 {{ restaurantName }}.
+    {{ languageService.translate('footer.rights') }}
+  </p>
+</footer>

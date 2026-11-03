@@ -1,0 +1,120 @@
+
+<section class="login-page" [attr.dir]="isArabic ? 'rtl' : 'ltr'">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-icon">🍔</div>
+
+      <h1>
+        {{ translate('Welcome Back!', 'أهلاً برجوعك!') }}
+      </h1>
+
+      <p>
+        {{
+          translate(
+            'Sign in to your Just Food account',
+            'سجل دخولك إلى حسابك في Just Food'
+          )
+        }}
+      </p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-field">
+        <label for="email">
+          {{ translate('Email Address', 'البريد الإلكتروني') }}
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          [placeholder]="translate('Enter your email', 'اكتب بريدك الإلكتروني')"
+        />
+
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small class="field-error">
+            {{
+              translate(
+                'Please enter a valid email address.',
+                'من فضلك اكتب بريد إلكتروني صحيح.'
+              )
+            }}
+          </small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="password">
+          {{ translate('Password', 'كلمة المرور') }}
+        </label>
+
+        <div class="password-field">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            [placeholder]="translate('Enter your password', 'اكتب كلمة المرور')"
+          />
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePassword()"
+            [attr.aria-label]="
+              showPassword()
+                ? translate('Hide password', 'إخفاء كلمة المرور')
+                : translate('Show password', 'إظهار كلمة المرور')
+            "
+          >
+            {{ showPassword() ? '🙈' : '👁️' }}
+          </button>
+        </div>
+
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small class="field-error">
+            {{
+              translate(
+                'Password is required.',
+                'كلمة المرور مطلوبة.'
+              )
+            }}
+          </small>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="login-error" role="alert">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        class="login-submit"
+        [disabled]="isSubmitting()"
+      >
+        {{
+          isSubmitting()
+            ? translate('Signing in...', 'جاري تسجيل الدخول...')
+            : translate('Sign In', 'تسجيل الدخول')
+        }}
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>
+        {{ translate("Don't have an account?", 'معندكش حساب؟') }}
+
+        <a routerLink="/register">
+          {{ translate('Create Account', 'إنشاء حساب') }}
+        </a>
+      </p>
+
+      <a routerLink="/menu" class="back-link">
+        {{ translate('Back to Menu', 'الرجوع للمنيو') }}
+      </a>
+    </div>
+  </div>
+</section>

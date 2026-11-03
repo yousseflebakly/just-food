@@ -1,0 +1,183 @@
+
+<section
+  class="my-orders-page"
+  [attr.dir]="languageService.currentLanguage() === 'ar' ? 'rtl' : 'ltr'"
+>
+  <div class="orders-container">
+
+    <!-- Page Header -->
+    <header class="page-header">
+      <div>
+        <h1>
+          {{ translate('My Orders', 'طلباتي') }}
+        </h1>
+
+        <p>
+          {{
+            translate(
+              'View your order history and track the status of your orders.',
+              'تابع حالة طلباتك واستعرض طلباتك السابقة.'
+            )
+          }}
+        </p>
+      </div>
+
+      <a routerLink="/profile" class="back-link">
+        {{ translate('Back to Profile', 'الرجوع للملف الشخصي') }}
+      </a>
+    </header>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="state-card">
+        <div class="loading-spinner" aria-hidden="true"></div>
+
+        <h2>
+          {{ translate('Loading orders...', 'جاري تحميل الطلبات...') }}
+        </h2>
+      </div>
+    }
+
+    <!-- Error State -->
+    @else if (errorMessage()) {
+      <div class="state-card error-state">
+        <span class="state-icon" aria-hidden="true">⚠️</span>
+
+        <h2>
+          {{ translate('Something went wrong', 'حدث خطأ') }}
+        </h2>
+
+        <p>{{ errorMessage() }}</p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="loadOrders()"
+        >
+          {{ translate('Try Again', 'حاول مرة تانية') }}
+        </button>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @else if (orders().length === 0) {
+      <div class="state-card empty-state">
+        <span class="state-icon" aria-hidden="true">🛍️</span>
+
+        <h2>
+          {{ translate('No orders yet', 'لسه معندكش طلبات') }}
+        </h2>
+
+        <p>
+          {{
+            translate(
+              'Your orders will appear here after you place your first order.',
+              'طلباتك هتظهر هنا بعد ما تعمل أول طلب.'
+            )
+          }}
+        </p>
+
+        <a routerLink="/menu" class="primary-button">
+          {{ translate('Explore Menu', 'تصفح المنيو') }}
+        </a>
+      </div>
+    }
+
+    <!-- Orders List -->
+    @else {
+      <div class="orders-summary">
+        <h2>
+          {{ translate('Order History', 'سجل الطلبات') }}
+        </h2>
+
+        <span class="orders-count">
+          {{ orders().length }}
+          {{ translate('Orders', 'طلبات') }}
+        </span>
+      </div>
+
+      <div class="orders-list">
+        @for (order of orders(); track order.id) {
+          <article class="order-card">
+
+            <!-- Order Header -->
+            <div class="order-header">
+              <div class="order-heading">
+                <h3>
+                  {{ translate('Order', 'طلب') }} #{{ order.id }}
+                </h3>
+
+                <span class="order-date">
+                  {{ formatDate(order.createdAt) }}
+                </span>
+              </div>
+
+              <span
+                class="status-badge"
+                [class.status-pending]="order.status === 'PENDING'"
+                [class.status-accepted]="order.status === 'ACCEPTED'"
+                [class.status-preparing]="order.status === 'PREPARING'"
+                [class.status-ready]="order.status === 'READY'"
+                [class.status-delivered]="order.status === 'DELIVERED'"
+                [class.status-cancelled]="order.status === 'CANCELLED'"
+              >
+                {{ getStatusLabel(order.status) }}
+              </span>
+            </div>
+
+            <!-- Order Products -->
+            <div class="order-items">
+              @for (item of order.items; track item.id) {
+                <div class="order-item">
+                  <div class="item-details">
+                    <span class="item-name">
+                      {{ getProductName(item.product) }}
+                    </span>
+
+                    <span class="item-quantity">
+                      {{ translate('Quantity', 'الكمية') }}:
+                      {{ item.quantity }}
+                    </span>
+                  </div>
+
+                  <span class="item-price">
+                    {{ formatPrice(item.unitPrice) }}
+                    {{ translate('EGP', 'ج.م') }}
+                    × {{ item.quantity }}
+                  </span>
+                </div>
+              }
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="order-address">
+              <span aria-hidden="true">📍</span>
+
+              <div>
+                <strong>
+                  {{ translate('Delivery Address', 'عنوان التوصيل') }}
+                </strong>
+
+                <p>{{ order.address }}</p>
+              </div>
+            </div>
+
+            <!-- Order Footer -->
+            <div class="order-footer">
+              <span>
+                {{ translate('Total', 'الإجمالي') }}
+              </span>
+
+              <strong>
+                {{ formatPrice(order.totalPrice) }}
+                {{ translate('EGP', 'ج.م') }}
+              </strong>
+            </div>
+
+          </article>
+        }
+      </div>
+    }
+
+  </div>
+</section>

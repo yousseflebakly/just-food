@@ -1,0 +1,226 @@
+
+<div class="settings-page">
+  <div class="page-header">
+    <div>
+      <h1>Restaurant Settings</h1>
+      <p>Manage your restaurant information and preferences.</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="state-message">
+      <p>Loading restaurant settings...</p>
+    </div>
+  } @else {
+    @if (errorMessage) {
+      <div class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">
+        {{ successMessage }}
+      </div>
+    }
+
+    <form (ngSubmit)="saveSettings()" #settingsForm="ngForm">
+      <section class="settings-card">
+        <div class="section-heading">
+          <span class="section-icon">🏪</span>
+          <div>
+            <h2>Restaurant Information</h2>
+            <p>Basic details about your restaurant.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="restaurantName">Restaurant Name *</label>
+            <input
+              id="restaurantName"
+              type="text"
+              name="name"
+              [(ngModel)]="settings.name"
+              maxlength="100"
+              required
+              placeholder="Enter restaurant name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="restaurantPhone">Phone Number</label>
+            <input
+              id="restaurantPhone"
+              type="tel"
+              name="phone"
+              [(ngModel)]="settings.phone"
+              placeholder="Enter phone number"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="restaurantDescription">Description</label>
+            <textarea
+              id="restaurantDescription"
+              name="description"
+              [(ngModel)]="settings.description"
+              maxlength="500"
+              rows="3"
+              placeholder="Tell customers about your restaurant"
+            ></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="restaurantAddress">Address</label>
+            <input
+              id="restaurantAddress"
+              type="text"
+              name="address"
+              [(ngModel)]="settings.address"
+              placeholder="Enter restaurant address"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="restaurantLogo">Restaurant Logo URL</label>
+            <input
+              id="restaurantLogo"
+              type="text"
+              name="logo"
+              [(ngModel)]="settings.logo"
+              placeholder="https://example.com/logo.png"
+            />
+
+            @if (settings.logo) {
+              <div class="logo-preview">
+                <img
+                  [src]="settings.logo"
+                  alt="Restaurant logo preview"
+                />
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <span class="section-icon">🕒</span>
+          <div>
+            <h2>Opening Hours</h2>
+            <p>Set your restaurant's daily opening and closing times.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="openingTime">Opening Time</label>
+            <input
+              id="openingTime"
+              type="time"
+              name="openingTime"
+              [(ngModel)]="settings.openingTime"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="closingTime">Closing Time</label>
+            <input
+              id="closingTime"
+              type="time"
+              name="closingTime"
+              [(ngModel)]="settings.closingTime"
+              required
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <span class="section-icon">🛵</span>
+          <div>
+            <h2>Delivery Settings</h2>
+            <p>Configure your restaurant's delivery fee.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          
+<div class="form-group">
+  <label for="deliveryFee">Delivery Fee (EGP)</label>
+
+  <select
+    id="deliveryFee"
+    name="deliveryFee"
+    [(ngModel)]="settings.deliveryFee"
+    required
+  >
+    @for (fee of deliveryFeeOptions; track fee) {
+      <option [ngValue]="fee">
+        {{ fee }} EGP
+      </option>
+    }
+  </select>
+</div>
+
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <span class="section-icon">🟢</span>
+          <div>
+            <h2>Restaurant Status</h2>
+            <p>Control whether your restaurant is accepting orders.</p>
+          </div>
+        </div>
+
+        <div class="status-row">
+          <div>
+            <strong>
+              {{ settings.isOpen ? 'Restaurant Open' : 'Restaurant Closed' }}
+            </strong>
+            <p>
+              {{
+                settings.isOpen
+                  ? 'Your restaurant is marked as open.'
+                  : 'Your restaurant is marked as closed.'
+              }}
+            </p>
+          </div>
+
+          <label class="switch">
+            <input
+              type="checkbox"
+              name="isOpen"
+              [(ngModel)]="settings.isOpen"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="resetChanges()"
+          [disabled]="isSaving"
+        >
+          Reset Changes
+        </button>
+
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="isSaving || settingsForm.invalid"
+        >
+          {{ isSaving ? 'Saving...' : 'Save Settings' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

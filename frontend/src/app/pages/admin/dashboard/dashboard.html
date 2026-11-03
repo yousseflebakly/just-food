@@ -1,0 +1,185 @@
+<div class="dashboard-content">
+    <!-- Header -->
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">RESTAURANT MANAGEMENT</p>
+        <h1>Dashboard Overview</h1>
+        <p class="welcome-text">
+          Welcome back! Here's what's happening at your restaurant.
+        </p>
+      </div>
+      <div class="admin-profile">
+        <div class="avatar">A</div>
+        <div>
+          <strong>Admin</strong>
+          <small>Restaurant Owner</small>
+        </div>
+      </div>
+    </header>
+
+    <!-- Statistics -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon orange">🧾</div>
+        <p>Total Orders</p>
+        <h2>{{ isLoading ? '...' : totalOrders }}</h2>
+        <small>All customer orders</small>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon blue">⏳</div>
+        <p>Pending Orders</p>
+        <h2>{{ isLoading ? '...' : pendingOrders }}</h2>
+        <small>Waiting for confirmation</small>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">💰</div>
+        <p>Total Revenue</p>
+        <h2>
+          {{ isLoading ? '...' : (totalRevenue | number:'1.2-2') }}
+        </h2>
+        <small>EGP · Delivered orders only</small>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon purple">🍔</div>
+        <p>Products</p>
+        <h2>—</h2>
+        <small>Will be connected to Products API</small>
+      </div>
+    </section>
+
+    <!-- Recent Orders -->
+    <section class="orders-section">
+
+      @if (statusErrorMessage) {
+        <div class="order-error" role="alert">
+          ⚠️ {{ statusErrorMessage }}
+        </div>
+      }
+
+      @if (statusSuccessMessage) {
+        <div class="order-success" role="status">
+          ✅ {{ statusSuccessMessage }}
+        </div>
+      }
+
+      <div class="section-header">
+        <div>
+          <h2>Recent Orders</h2>
+          <p>Manage your latest customer orders</p>
+        </div>
+
+        <div class="orders-header-actions">
+          <button
+            type="button"
+            class="refresh-orders-btn"
+            [disabled]="isLoading || updatingOrderId !== null"
+            (click)="loadOrders()"
+          >
+            {{ isLoading ? 'Refreshing...' : '↻ Refresh Orders' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (isLoading) {
+              <tr>
+                <td colspan="6" class="empty-state">
+                  Loading orders...
+                </td>
+              </tr>
+            } @else if (errorMessage) {
+              <tr>
+                <td colspan="6" class="empty-state">
+                  {{ errorMessage }}
+                </td>
+              </tr>
+            } @else if (recentOrders.length === 0) {
+              <tr>
+                <td colspan="6" class="empty-state">
+                  No orders yet.
+                </td>
+              </tr>
+            } @else {
+              @for (order of recentOrders; track order.id) {
+                <tr>
+                  <td>#{{ order.id }}</td>
+                  <td>{{ order.fullName }}</td>
+                  <td>{{ order.createdAt | date:'medium' }}</td>
+                  <td>
+                    {{ order.totalPrice | number:'1.2-2' }} EGP
+                  </td>
+
+                  <td>
+                    <span
+                      class="status-badge"
+                      [ngClass]="order.status.toLowerCase()"
+                    >
+                      {{ order.status }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="order-actions">
+                      @if (getNextStatus(order.status)) {
+                        <button
+                          type="button"
+                          class="order-action-btn"
+                          [disabled]="updatingOrderId !== null"
+                          (click)="updateStatus(order)"
+                        >
+                          @if (updatingOrderId === order.id) {
+                            Updating...
+                          } @else {
+                            {{ getStatusButtonLabel(order.status) }}
+                          }
+                        </button>
+                      }
+
+                      @if (
+                        order.status === 'PENDING' ||
+                        order.status === 'ACCEPTED' ||
+                        order.status === 'PREPARING'
+                      ) {
+                        <button
+                          type="button"
+                          class="cancel-order-btn"
+                          [disabled]="updatingOrderId !== null"
+                          (click)="cancelOrder(order)"
+                        >
+                          Cancel Order
+                        </button>
+                      }
+
+                      @if (order.status === 'DELIVERED') {
+                        <span>Completed</span>
+                      }
+
+                      @if (order.status === 'CANCELLED') {
+                        <span>Cancelled</span>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+</div>

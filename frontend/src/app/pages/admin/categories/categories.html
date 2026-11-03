@@ -1,0 +1,119 @@
+
+<div class="categories-page">
+  <header class="page-header">
+    <div>
+      <h1>Categories Management</h1>
+      <p>Manage your restaurant menu categories.</p>
+    </div>
+  </header>
+
+  <div *ngIf="errorMessage" class="alert error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert success">
+    {{ successMessage }}
+  </div>
+
+  <section class="form-card">
+    <h2>{{ editingId === null ? 'Add Category' : 'Edit Category' }}</h2>
+
+    <form (ngSubmit)="saveCategory()">
+      <input
+        type="text"
+        name="categoryName"
+        [(ngModel)]="categoryName"
+        placeholder="Category name (e.g. Burgers, Drinks)"
+        maxlength="100"
+        required
+      />
+
+      <button type="submit" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : editingId === null ? 'Add Category' : 'Save Changes' }}
+      </button>
+
+      <button
+        *ngIf="editingId !== null"
+        type="button"
+        class="cancel-btn"
+        (click)="cancelEdit()"
+      >
+        Cancel
+      </button>
+    </form>
+  </section>
+
+  <p *ngIf="isLoading">Loading categories...</p>
+
+  <ng-container *ngIf="!isLoading">
+    <section class="table-card">
+      <h2>Active Categories ({{ activeCategories.length }})</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Products</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let category of activeCategories">
+              <td>{{ category.name }}</td>
+              <td>{{ category._count?.products ?? 0 }}</td>
+              <td class="actions">
+                <button class="edit-btn" (click)="editCategory(category)">
+                  Edit
+                </button>
+                <button class="delete-btn" (click)="deleteCategory(category)">
+                  Deactivate
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="activeCategories.length === 0">
+              <td colspan="3">No active categories.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <h2>Inactive Categories ({{ inactiveCategories.length }})</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Products</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let category of inactiveCategories">
+              <td>{{ category.name }}</td>
+              <td>{{ category._count?.products ?? 0 }}</td>
+              <td class="actions">
+                <button
+                  class="restore-btn"
+                  (click)="restoreCategory(category)"
+                >
+                  Restore
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="inactiveCategories.length === 0">
+              <td colspan="3">No inactive categories.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

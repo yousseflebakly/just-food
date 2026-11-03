@@ -1,0 +1,223 @@
+
+<section class="checkout-page">
+  <div class="checkout-header">
+    <h1>{{ languageService.translate('checkout.title') }}</h1>
+    <p>{{ languageService.translate('checkout.subtitle') }}</p>
+  </div>
+
+  <div class="checkout-container">
+    <!-- {{ languageService.translate('checkout.deliveryInfo') }} -->
+    <form
+      class="checkout-form"
+      [formGroup]="checkoutForm"
+      (ngSubmit)="onSubmit()"
+    >
+      <h2>{{ languageService.translate('checkout.deliveryInfo') }}</h2>
+
+      <!-- Restaurant Status -->
+      @if (isLoadingSettings()) {
+        <div class="restaurant-status">
+          <p>{{ languageService.translate('checkout.checkingStatus') }}</p>
+        </div>
+      } @else if (!isRestaurantOpen()) {
+        <div class="restaurant-status restaurant-closed" role="alert">
+          <strong>🔴 {{ languageService.translate('checkout.closed') }}</strong>
+          <p>
+            {{ languageService.translate('checkout.closedInfo') }}
+          </p>
+        </div>
+      } @else {
+        <div class="restaurant-status restaurant-open">
+          <strong>🟢 {{ languageService.translate('checkout.open') }}</strong>
+          <p>{{ languageService.translate('checkout.openInfo') }}</p>
+        </div>
+      }
+
+      <!-- {{ languageService.translate('checkout.fullName') }} -->
+      <div class="form-group">
+        <label for="fullName">{{ languageService.translate('checkout.fullName') }}</label>
+
+        <input
+          id="fullName"
+          type="text"
+          formControlName="fullName"
+          placeholder="{{ languageService.translate('checkout.namePlaceholder') }}"
+          autocomplete="name"
+        />
+
+        @if (
+          checkoutForm.controls.fullName.touched &&
+          checkoutForm.controls.fullName.invalid
+        ) {
+          <small class="error-message">
+            {{ languageService.translate('checkout.nameError') }}
+          </small>
+        }
+      </div>
+
+      <!-- {{ languageService.translate('checkout.phone') }} -->
+      <div class="form-group">
+        <label for="phoneNumber">{{ languageService.translate('checkout.phone') }}</label>
+
+        <input
+          id="phoneNumber"
+          type="tel"
+          formControlName="phoneNumber"
+          placeholder="01XXXXXXXXX"
+          autocomplete="tel"
+        />
+
+        @if (
+          checkoutForm.controls.phoneNumber.touched &&
+          checkoutForm.controls.phoneNumber.invalid
+        ) {
+          <small class="error-message">
+            {{ languageService.translate('checkout.phoneError') }}
+          </small>
+        }
+      </div>
+
+      <!-- {{ languageService.translate('checkout.address') }} -->
+      <div class="form-group">
+        <label for="address">{{ languageService.translate('checkout.address') }}</label>
+
+        <textarea
+          id="address"
+          formControlName="address"
+          placeholder="{{ languageService.translate('checkout.addressPlaceholder') }}"
+          rows="4"
+          autocomplete="street-address"
+        ></textarea>
+
+        @if (
+          checkoutForm.controls.address.touched &&
+          checkoutForm.controls.address.invalid
+        ) {
+          <small class="error-message">
+            {{ languageService.translate('checkout.addressError') }}
+          </small>
+        }
+      </div>
+
+      <!-- Order Notes -->
+      <div class="form-group">
+        <label for="notes">{{ languageService.translate('checkout.notes') }}</label>
+
+        <textarea
+          id="notes"
+          formControlName="notes"
+          placeholder="{{ languageService.translate('checkout.notesPlaceholder') }}"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Submit Order -->
+      <button
+        type="submit"
+        class="place-order-btn"
+        [disabled]="
+          cartService.items().length === 0 ||
+          isSubmitting() ||
+          isLoadingSettings() ||
+          !isRestaurantOpen()
+        "
+      >
+        @if (isSubmitting()) {
+          {{ languageService.translate('checkout.placing') }}
+        } @else if (isLoadingSettings()) {
+          {{ languageService.translate('checkout.checking') }}
+        } @else if (!isRestaurantOpen()) {
+          {{ languageService.translate('checkout.closed') }}
+        } @else {
+          {{ languageService.translate('checkout.place') }}
+        }
+      </button>
+
+      @if (errorMessage()) {
+        <p class="error-message" role="alert">
+          {{ languageService.translate(errorMessage()) }}
+        </p>
+      }
+
+      @if (successMessage()) {
+        <p class="success-message" role="status">
+          {{ languageService.translate(successMessage()) }}
+        </p>
+      }
+
+      @if (cartService.items().length === 0 && !successMessage()) {
+        <small class="error-message">
+          {{ languageService.translate('checkout.emptyWarning') }}
+        </small>
+      }
+    </form>
+
+    <!-- Order Summary -->
+    <div class="checkout-summary">
+      <h2>{{ languageService.translate('cart.summary') }}</h2>
+
+      @if (cartService.items().length === 0) {
+        <div class="empty-summary">
+          <p>{{ languageService.translate('checkout.empty') }}</p>
+          <p>{{ languageService.translate('checkout.addFirst') }}</p>
+        </div>
+      } @else {
+        <div class="summary-items">
+          @for (item of cartService.items(); track item.product.id) {
+            <div class="summary-item">
+              <img
+                [src]="item.product.image"
+                [alt]="localizedProductName(item.product, languageService.currentLanguage())"
+              />
+
+              <div class="summary-item-info">
+                <h3>{{ localizedProductName(item.product, languageService.currentLanguage()) }}</h3>
+                <p>{{ languageService.translate('common.quantity') }} {{ item.quantity }}</p>
+              </div>
+
+              <strong>
+                {{ item.product.price * item.quantity }} {{ languageService.translate('common.currency') }}
+              </strong>
+            </div>
+          }
+        </div>
+
+        <div class="summary-total">
+          <div class="summary-row">
+            <span>{{ languageService.translate('checkout.totalItems') }}</span>
+            <strong>{{ cartService.totalItems() }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>{{ languageService.translate('checkout.subtotal') }}</span>
+            <strong>{{ subtotal().toFixed(2) }} {{ languageService.translate('common.currency') }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>{{ languageService.translate('checkout.deliveryFee') }}</span>
+
+            @if (isLoadingSettings()) {
+              <strong>{{ languageService.translate('common.loading') }}</strong>
+            } @else {
+              <strong>{{ deliveryFee().toFixed(2) }} {{ languageService.translate('common.currency') }}</strong>
+            }
+          </div>
+
+          <div class="summary-row grand-total">
+            <span>{{ languageService.translate('checkout.finalTotal') }}</span>
+
+            @if (isLoadingSettings()) {
+              <strong>{{ languageService.translate('checkout.calculating') }}</strong>
+            } @else {
+              <strong>{{ totalPrice().toFixed(2) }} {{ languageService.translate('common.currency') }}</strong>
+            }
+          </div>
+
+          <small class="total-note">
+            {{ languageService.translate('checkout.totalNote') }}
+          </small>
+        </div>
+      }
+    </div>
+  </div>
+</section>
